@@ -16,12 +16,12 @@ exports.login = exports.register = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = __importDefault(require("../db/client"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, username, password, firstName, lastName, userType, Sweetness, Spiciness, Dish, Sourness } = req.body;
-        // Log incoming data for debugging
-        console.log("Incoming data:", req.body);
         const existingUser = yield client_1.default.user.findFirst({
             where: { OR: [{ email }, { username }] }
         });
@@ -46,8 +46,6 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(201).json({ message: "User registered successfully", user });
     }
     catch (error) {
-        // Log the error details for better debugging
-        console.error("Registration error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

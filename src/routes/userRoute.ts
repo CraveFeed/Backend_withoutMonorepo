@@ -5,9 +5,8 @@ import { authenticateUser } from "../middlewares/authMiddleware";
 const router = Router();
 
 router.post('/signUp', authController.register)
+router.post('/signIn', authController.login)
 
 router.use(authenticateUser);
-
-router.get('/signIn', authController.login)
 
 export default router;
