@@ -47,6 +47,7 @@ model User {
   Latitude           String?
   Longitude          String?
   banner             String?
+  emailVerified      Boolean             @default(false)
   mobileVerified     Boolean             @default(false)
   mobileNo           String?
   CountryCode        String?

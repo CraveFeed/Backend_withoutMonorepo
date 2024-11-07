@@ -17,6 +17,7 @@ CREATE TABLE "User" (
     "Latitude" TEXT,
     "Longitude" TEXT,
     "banner" TEXT,
+    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
     "mobileVerified" BOOLEAN NOT NULL DEFAULT false,
     "mobileNo" TEXT,
     "CountryCode" TEXT,
