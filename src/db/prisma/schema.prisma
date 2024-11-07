@@ -80,6 +80,8 @@ model Message {
   createdAt  DateTime @default(now())
   sender     User?    @relation("SentMessages", fields: [senderId], references: [id], onDelete: SetNull)
   receiver   User?    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: SetNull)
+
+  @@index([senderId, receiverId])
 }
 
 model ChefCorner {
