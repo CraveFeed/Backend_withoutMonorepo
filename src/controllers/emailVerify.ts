@@ -27,7 +27,7 @@ export const sendOTP = async (req: Request, res: Response): Promise<any> => {
         })
 
         if(!user){
-            return res.status(400).send("Email dosent exists")
+            return res.status(400).send("Email does not exists")
         }
 
         const rClient = await RedisClient();
@@ -62,6 +62,16 @@ export const verifyOTP = async (req: Request, res: Response): Promise<any> => {
 
         if (typeof email !== 'string' || typeof otp !== 'string') {
             return res.status(400).send('Invalid request');
+        }
+
+        const user = await pclient.user.findFirst({
+            where: {
+                email: email,
+            },
+        });
+
+        if (!user) {
+            return res.status(400).send('Invalid email');
         }
 
         const rClient = await RedisClient();
@@ -106,6 +116,24 @@ export const checkVerification = async (req: Request, res: Response): Promise<an
             res.status(200).json({ message: "Email verified" });
         } else {
             res.status(400).json({ message: "Email not verified" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export const checkEmail = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { email } = req.body;
+        const user = await pclient.user.findUnique({
+            where: {
+                email: email,
+            },
+        });
+        if(user){
+            res.status(200).json({ message: "Email already taken" });
+        } else {
+            res.status(400).json({ message: "Email exists" });
         }
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
