@@ -124,6 +124,7 @@ model Event {
   description  String // Description of the event
   startDate    DateTime // Start date of the event
   endDate      DateTime // End date of the event
+  completed    Boolean    @default(false)
   location     String // Event location (restaurant address)
   restaurantId String // Link to restaurat
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
