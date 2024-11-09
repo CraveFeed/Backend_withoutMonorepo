@@ -3,7 +3,7 @@ import pclient from '../db/client';
 
 const router = express.Router();
 
-router.get('/chat/history/:userId', async (req, res) => {
+router.get('/history/:userId', async (req, res) => {
     const { userId } = req.params;
     const currentUserId = (req as any).user.userId;
 
