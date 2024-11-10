@@ -308,4 +308,88 @@ export const createPost = async (req: Request, res: Response): Promise<any> => {
     }
 };
 
+export const repostPost = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { originalPostId } = req.body;
+        const userId = (req as any).user.userId;
 
+        const originalPost = await pclient.post.findUnique({
+            where: { id: originalPostId },
+            include: {
+                hashTags: true,
+            }
+        });
+
+        if (!originalPost) {
+            return res.status(404).json({ error: "Original post not found" });
+        }
+        const existingRepost = await pclient.post.findFirst({
+            where: { originalPostId: originalPost.id, userId }
+        });
+
+        if (existingRepost) {
+            await pclient.post.delete({
+                where: { id: existingRepost.id }
+            });
+            return res.status(200).json({ message: "Post unreposted successfully" });
+        } else {
+            const repost = await pclient.post.create({
+                data: {
+                    title: originalPost.title,
+                    description: originalPost.description,
+                    latitude: originalPost.latitude,
+                    longitude: originalPost.longitude,
+                    Cuisine: originalPost.Cuisine,
+                    Dish: originalPost.Dish,
+                    isBusinessPost: originalPost.isBusinessPost,
+                    pictures: originalPost.pictures,
+                    impressions: 0,
+                    userId,
+                    originalPostId: originalPost.id,
+                    restaurantId: originalPost.restaurantId,
+                    hashTags: { connect: originalPost.hashTags.map((hashtag) => ({ id: hashtag.id })) },
+                },
+            });
+            return res.status(201).json({ repost });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+export const followUnfollowUser = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { userId } = (req as any).user;
+        const userToFollowId = req.body.userId;
+
+        const follow = await pclient.follows.findFirst({
+            where: {
+                followerId: userId,
+                followingId: userToFollowId,
+            },
+        });
+
+        if (follow) {
+            await pclient.follows.delete({
+                where: {
+                    followerId_followingId: {
+                        followerId: userId,
+                        followingId: userToFollowId,
+                    }
+                },
+            })
+            res.status(200).json({ message: "Unfollowed successfully" });
+        } else {
+            await pclient.follows.create({
+                data: {
+                    followerId: userId,
+                    followingId: userToFollowId,
+                },
+            });
+            res.status(200).json({ message: "Followed successfully" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}

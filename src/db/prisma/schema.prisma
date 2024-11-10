@@ -214,6 +214,8 @@ model Follows {
   follower    User   @relation("FollowersRelation", fields: [followerId], references: [id], onDelete: Cascade)
   followingId String
   following   User   @relation("FollowingRelation", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
 }
 
 model NotificationUpdate {
