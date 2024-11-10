@@ -153,7 +153,7 @@ model Post {
   pictures       String[]
   userId         String
   city           String?
-  impressions    Int
+  impressions    Int       @default(0)
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes          Like[]
   comments       Comment[]
@@ -181,22 +181,22 @@ model Comment {
 }
 
 model Like {
-  id         String     @id @default(cuid())
-  postId     String
-  post       Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  videoId    String
-  chefcorner ChefCorner @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id         String      @id @default(cuid())
+  postId     String?
+  post       Post?       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  videoId    String?
+  chefcorner ChefCorner? @relation(fields: [videoId], references: [id], onDelete: Cascade)
   userId     String
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model HashTag {
-  id           String     @id @default(cuid())
-  postId       String
-  chefcornerId String
-  word         String     @unique
-  post         Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  chefCorner   ChefCorner @relation(fields: [chefcornerId], references: [id], onDelete: Cascade)
+  id           String      @id @default(cuid())
+  postId       String?
+  chefcornerId String?
+  word         String      @unique
+  post         Post?       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  chefCorner   ChefCorner? @relation(fields: [chefcornerId], references: [id], onDelete: Cascade)
 
   @@index([word])
 }

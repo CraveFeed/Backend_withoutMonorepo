@@ -101,8 +101,23 @@ export const getUsersPostsWithComments = async (req: Request, res: Response): Pr
             },
             orderBy: {
                 createdAt: 'desc'
-            }
+            },
+            take: 10
         });
+
+        await Promise.all(posts.map(async (post) => {
+            await pclient.post.update({
+                where: {
+                    id: post.id
+                },
+                data: {
+                    impressions: {
+                        increment: 1
+                    }
+                }
+            })
+        }));
+
         res.status(200).json({ posts });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -168,4 +183,129 @@ export const getUserFollowing = async (req: Request, res: Response): Promise<any
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const commentOnPost = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { postId, content } = req.body;
+        const userId = (req as any).user.userId;
+
+        const comment = await pclient.comment.create({
+            data: {
+                postId,
+                content,
+                userId
+            }
+        });
+
+        res.status(201).json({ comment });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export const deleteComment = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { commentId } = req.body;
+        const userId = (req as any).user.userId;
+
+        const comment = await pclient.comment.delete({
+            where: {
+                id: commentId,
+                userId
+            }
+        });
+
+        res.status(200).json({ comment });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export const likeUnlikePost = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { postId } = req.body;
+        const userId = (req as any).user.userId;
+
+        const likePost = await pclient.like.findFirst({
+            where: {
+                postId: postId,
+                userId: userId
+            }
+        });
+
+        if (likePost) {
+            const like = await pclient.like.delete({
+                where: {
+                    id: likePost.id,
+                }
+            });
+            res.status(200).json({ like });
+        } else {
+            const like = await pclient.like.create({
+                data: {
+                    postId,
+                    userId,
+                }
+            });
+            res.status(201).json({ like });
+        }
+
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export const createPost = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { title, description, latitude, longitude, Cuisine, Dish, isBusinessPost, pictures, impressions, restaurantId, hashtags } = req.body;
+        const userId = (req as any).user.userId;
+
+        const newPost = await pclient.post.create({
+            data: {
+                title,
+                description,
+                latitude,
+                longitude,
+                Cuisine,
+                Dish,
+                isBusinessPost,
+                pictures,
+                impressions,
+                userId,
+                restaurantId,
+            },
+        });
+
+        const hashtagPromises = (hashtags || []).map(async (word: string) => {
+            const hashtag = await pclient.hashTag.upsert({
+                where: { word },
+                create: {
+                    word,
+                    post: { connect: { id: newPost.id } },
+                },
+                update: {},
+            });
+
+            await pclient.trendingHashtag.upsert({
+                where: { word },
+                create: {
+                    word,
+                    count: 1,
+                    lastUsed: new Date(),
+                },
+                update: {
+                    count: { increment: 1 },
+                    lastUsed: new Date(),
+                },
+            });
+        });
+
+        await Promise.all(hashtagPromises);
+
+        res.status(201).json({ newPost });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 
