@@ -24,6 +24,8 @@ export const getHashStartingWith = async (req: Request, res: Response): Promise<
 export const getPostsByHashtag = async (req: Request, res: Response): Promise<any> => {
     try {
         const { hash } = req.body;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
         const posts = await pclient.post.findMany({
             where: {
@@ -61,41 +63,12 @@ export const getPostsByHashtag = async (req: Request, res: Response): Promise<an
                         comments: true,
                     }
                 },
-                comments: {
-                    select: {
-                        id: true,
-                        content: true,
-                        createdAt: true,
-                        user: {
-                            select: {
-                                username: true,
-                                firstName: true,
-                                lastName: true,
-                                avatar: true,
-                                Type: true,
-                            }
-                        }
-                    }
-                },
-                likes: {
-                    select: {
-                        id: true,
-                        user: {
-                            select: {
-                                username: true,
-                                firstName: true,
-                                lastName: true,
-                                avatar: true,
-                                Type: true,
-                            }
-                        }
-                    }
-                },
             },
             orderBy: {
                 createdAt: 'desc'
             },
-            take: 10
+            skip: (page - 1) * limit,
+            take: limit,
         });
 
         await Promise.all(posts.map(async (post) => {
@@ -112,6 +85,79 @@ export const getPostsByHashtag = async (req: Request, res: Response): Promise<an
         }));
 
         res.status(200).json({ posts });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export const getCommentsOfPosts = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { postId } = req.body;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        const comments = await pclient.comment.findMany({
+            where: {
+                postId: postId
+            },
+            select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                user: {
+                    select: {
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        avatar: true,
+                        Type: true,
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        res.status(200).json({ comments });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+
+export const getLikesOfPosts = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { postId } = req.body;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        const likes = await pclient.like.findMany({
+            where: {
+                postId: postId
+            },
+            select: {
+                id: true,
+                user: {
+                    select: {
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        avatar: true,
+                        Type: true,
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        res.status(200).json({ likes });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
@@ -198,9 +244,11 @@ export const getUserProfileSummary = async (req: Request, res: Response): Promis
     }
 }
 
-export const getUsersPostsWithComments = async (req: Request, res: Response): Promise<any> => {
+export const getUsersPosts = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.body;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
         const posts = await pclient.post.findMany({
             where: {
@@ -234,41 +282,12 @@ export const getUsersPostsWithComments = async (req: Request, res: Response): Pr
                         comments: true,
                     }
                 },
-                comments: {
-                    select: {
-                        id: true,
-                        content: true,
-                        createdAt: true,
-                        user: {
-                            select: {
-                                username: true,
-                                firstName: true,
-                                lastName: true,
-                                avatar: true,
-                                Type: true,
-                            }
-                        }
-                    }
-                },
-                likes: {
-                    select: {
-                        id: true,
-                        user: {
-                            select: {
-                                username: true,
-                                firstName: true,
-                                lastName: true,
-                                avatar: true,
-                                Type: true,
-                            }
-                        }
-                    }
-                },
             },
             orderBy: {
                 createdAt: 'desc'
             },
-            take: 10
+            skip: (page - 1) * limit,
+            take: limit,
         });
 
         await Promise.all(posts.map(async (post) => {
@@ -293,6 +312,8 @@ export const getUsersPostsWithComments = async (req: Request, res: Response): Pr
 export const getUserFollowers = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.body;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
         const followers = await pclient.follows.findMany({
             where: {
@@ -312,7 +333,9 @@ export const getUserFollowers = async (req: Request, res: Response): Promise<any
             },
             orderBy: {
                 followerId: 'asc'
-            }
+            },
+            skip: (page - 1) * limit,
+            take: limit,
         });
         res.status(200).json({ followers });
     } catch (error) {
@@ -323,6 +346,8 @@ export const getUserFollowers = async (req: Request, res: Response): Promise<any
 export const getUserFollowing = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = req.body;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
         const following = await pclient.follows.findMany({
             where: {
@@ -342,7 +367,9 @@ export const getUserFollowing = async (req: Request, res: Response): Promise<any
             },
             orderBy: {
                 followingId: 'asc'
-            }
+            },
+            skip: (page - 1) * limit,
+            take: limit,
         });
         res.status(200).json({ following });
     } catch (error) {
