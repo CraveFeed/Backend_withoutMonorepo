@@ -13,15 +13,13 @@ export const afterBusinessMiddleware = async (req: Request, res: Response, next:
                 Restaurant: true
             }
         });
-        if (!user) {
+        if (!user || !user.Restaurant) {
             res.status(401).json({ error: "User is not a registered business" });
             return Promise.resolve();
         }
-        (req as any).restaurantID = user.Restaurant!.id;
+        (req as any).restaurantID = user.Restaurant.id;
         next();
-        return Promise.resolve();
     } catch (err) {
-        res.status(400).json({ error: err });
-        return Promise.resolve();
+        res.status(400).json({ error: 'An error occurred' });
     }
 };

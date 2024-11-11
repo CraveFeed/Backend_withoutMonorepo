@@ -260,6 +260,17 @@ export const createPost = async (req: Request, res: Response): Promise<any> => {
         const { title, description, latitude, longitude, Cuisine, Dish, isBusinessPost, pictures, impressions, restaurantId, hashtags } = req.body;
         const userId = (req as any).user.userId;
 
+        const resId = await pclient.restaurant.findUnique({
+            where: { id: restaurantId },
+            select: {
+                id: true,
+            }
+        });
+
+        if (!resId) {
+            return res.status(400).json({ error: "Restaurant not found for the provided restaurantId." });
+        }
+
         const newPost = await pclient.post.create({
             data: {
                 title,
@@ -272,7 +283,7 @@ export const createPost = async (req: Request, res: Response): Promise<any> => {
                 pictures,
                 impressions,
                 userId,
-                restaurantId,
+                restaurantId: resId!.id,
             },
         });
 

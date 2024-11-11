@@ -9,12 +9,9 @@ export const checkBusinessOwner = async (req: Request, res: Response, next: Next
                 id: userId,
                 Type: 'BUSINESS'
             },
-            include: {
-                Restaurant: true
-            }
         });
         if (!user) {
-            res.status(401).json({ error: "User is not a registered business" });
+            res.status(401).json({ error: "User is not a registered as business" });
             return Promise.resolve();
         }
         next();
