@@ -152,7 +152,7 @@ export const getChatHistory = async (req: Request, res: Response): Promise<any> 
     }
 }
 
-export const creteChat = async (req: Request, res: Response): Promise<any> => {
+export const createChat = async (req: Request, res: Response): Promise<any> => {
     try {
         const { content, userId } = req.body;
         const currentUserId = (req as any).user.userId;

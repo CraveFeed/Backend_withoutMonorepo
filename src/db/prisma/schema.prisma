@@ -89,10 +89,8 @@ model ChefCorner {
   title       String
   description String
   video       String
-  thumbnail   String
   createdAt   DateTime  @default(now())
-  viewsCount  Int
-  hashTags    HashTag[]
+  viewsCount  Int       @default(0)
   likes       Like[]
   comments    Comment[]
   userId      String
@@ -192,12 +190,10 @@ model Like {
 }
 
 model HashTag {
-  id           String      @id @default(cuid())
-  postId       String?
-  chefcornerId String?
-  word         String      @unique
-  post         Post?       @relation(fields: [postId], references: [id], onDelete: Cascade)
-  chefCorner   ChefCorner? @relation(fields: [chefcornerId], references: [id], onDelete: Cascade)
+  id     String  @id @default(cuid())
+  postId String?
+  word   String  @unique
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([word])
 }
