@@ -134,6 +134,7 @@ model Menu {
   description  String
   price        Float
   restaurantId String
+  createdAt    DateTime   @default(now())
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 }
 
@@ -206,11 +207,12 @@ model TrendingHashtag {
 }
 
 model Follows {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
   followerId  String
-  follower    User   @relation("FollowersRelation", fields: [followerId], references: [id], onDelete: Cascade)
+  follower    User     @relation("FollowersRelation", fields: [followerId], references: [id], onDelete: Cascade)
   followingId String
-  following   User   @relation("FollowingRelation", fields: [followingId], references: [id], onDelete: Cascade)
+  following   User     @relation("FollowingRelation", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
