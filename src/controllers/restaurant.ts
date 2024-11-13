@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import pclient from "../db/client";
+import { Currency } from "@prisma/client";
 
 export const getRestaurantMenu = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -96,8 +97,8 @@ export const getRestaurantPosts = async (req: Request, res: Response): Promise<a
 
 export const createMenu = async ( req: Request, res: Response ): Promise<any> =>{
     try {
-        const restaurantId = (req as any).body.restaurantId;
-        const { name, description, price } = req.body;
+        const restaurantId = (req as any).restaurantID;
+        const { name, description, price, denomination } = req.body;
 
         if(!restaurantId){
             return res.status(400).json({ error: "Restaurant not found for the provided restaurantId." });
@@ -108,7 +109,8 @@ export const createMenu = async ( req: Request, res: Response ): Promise<any> =>
                 name,
                 description,
                 price,
-                restaurantId
+                restaurantId,
+                denomination: denomination as Currency
             }
         })
 
@@ -142,12 +144,27 @@ export const deleteMenu = async (req: Request, res: Response): Promise<any> => {
 
 export const updateMenu = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { menuId } = req.body;
         const restaurantId = (req as any).restaurantID;
-        const { name, description, price } = req.body;
+        const { name, description, price, menuId } = req.body;
 
-        if(!restaurantId){
+        if (!restaurantId) {
             return res.status(400).json({ error: "Restaurant not found for the provided restaurantId." });
+        }
+
+        const updateData: any = {};
+
+        if (name) {
+            updateData.name = name;
+        }
+        if (description) {
+            updateData.description = description;
+        }
+        if (price) {
+            updateData.price = price;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ error: "No valid fields provided to update." });
         }
 
         const menu = await pclient.menu.update({
@@ -155,15 +172,12 @@ export const updateMenu = async (req: Request, res: Response): Promise<any> => {
                 id: menuId,
                 restaurantId: restaurantId
             },
-            data: {
-                name,
-                description,
-                price
-            }
+            data: updateData
         });
 
         res.status(200).json({ menu });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: "Internal server error" });
     }
 }
@@ -334,3 +348,51 @@ export const createRestaurant = async (req: Request, res: Response): Promise<voi
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const updateRestaurant = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = (req as any).user.userId;
+        const restaurantId = (req as any).restaurantID;
+
+        if (!restaurantId) {
+            return res.status(400).json({ message: "Restaurant ID is required" });
+        }
+
+        const restaurant = await pclient.restaurant.findUnique({
+            where: {
+                id: restaurantId,
+            },
+            select: {
+                userId: true
+            }
+        });
+
+        if (!restaurant) {
+            return res.status(404).json({ message: "Restaurant not found" });
+        }
+
+        if (restaurant.userId !== userId) {
+            return res.status(403).json({ message: "Unauthorized to update this restaurant" });
+        }
+
+        const { address, city, state, zipCode, latitude, longitude } = req.body;
+
+        const updatedRestaurant = await pclient.restaurant.update({
+            where: { id: restaurantId },
+            data: {
+                ...(address && { address }),
+                ...(city && { city }),
+                ...(state && { state }),
+                ...(zipCode && { zipCode }),
+                ...(latitude && { latitude }),
+                ...(longitude && { longitude })
+            },
+        });
+
+        res.status(200).json({ message: "Restaurant updated successfully", updatedRestaurant });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+

@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 import pclient from "../db/client";
 
-export const checkBusinessOwner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const checkBusinessOwner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const userId = (req as any).user.userId;
         const user = await pclient.user.findUnique({
@@ -21,3 +21,5 @@ export const checkBusinessOwner = async (req: Request, res: Response, next: Next
         return Promise.resolve();
     }
 };
+
+export default checkBusinessOwner;

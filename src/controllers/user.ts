@@ -229,7 +229,7 @@ export const followUnfollowUser = async (req: Request, res: Response): Promise<a
     }
 }
 
-export const updateUserProfile = async (req: Request, res: Response) => {
+export const updateUserProfile = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = (req as any).user.userId;
         const user = await pclient.user.findUnique({
@@ -239,8 +239,7 @@ export const updateUserProfile = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            res.status(401).json({ error: "User does not exist" });
-            return Promise.resolve();
+            return res.status(401).json({ error: "User does not exist" });
         }
 
         const { firstName, lastName, bio, profilePicture, bannerImage, Latitude, Longitude, Dish,  Spiciness , Sweetness, Sourness } = req.body;

@@ -189,6 +189,8 @@ export const getRestaurantStartingWith = async (req: Request, res: Response): Pr
                 avatar: true,
             }
         })
+
+        res.status(200).json(restaurants)
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
@@ -212,6 +214,8 @@ export const getUsersStartingWith = async (req: Request, res: Response): Promise
                 avatar: true,
             }
         })
+
+        res.status(200).json(users)
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
@@ -219,7 +223,7 @@ export const getUsersStartingWith = async (req: Request, res: Response): Promise
 
 export const getUserProfileSummary = async (req: Request, res: Response): Promise<any> => {
     try {
-        const userId = req.body;
+        const { userId } = req.body;
 
         const profileData = await pclient.user.findUnique({
             where: { id: userId },
@@ -250,7 +254,7 @@ export const getUserProfileSummary = async (req: Request, res: Response): Promis
 
 export const getUsersPosts = async (req: Request, res: Response): Promise<any> => {
     try {
-        const userId = req.body;
+        const { userId } = req.body;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 
@@ -315,7 +319,7 @@ export const getUsersPosts = async (req: Request, res: Response): Promise<any> =
 
 export const getUserFollowers = async (req: Request, res: Response): Promise<any> => {
     try {
-        const userId = req.body;
+        const { userId } = req.body;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 
@@ -349,7 +353,7 @@ export const getUserFollowers = async (req: Request, res: Response): Promise<any
 
 export const getUserFollowing = async (req: Request, res: Response): Promise<any> => {
     try {
-        const userId = req.body;
+        const { userId } = req.body;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 

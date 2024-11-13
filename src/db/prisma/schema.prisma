@@ -133,6 +133,7 @@ model Menu {
   name         String
   description  String
   price        Float
+  denomination Currency
   restaurantId String
   createdAt    DateTime   @default(now())
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)

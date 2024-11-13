@@ -20,7 +20,6 @@ router.post('/getUserFollowers', postController.getUserFollowers)
 router.post('/getUserFollowing', postController.getUserFollowing)
 router.post('/getRestaurantMenu', restaurantController.getRestaurantMenu)
 router.post('/getRestaurantPosts', restaurantController.getRestaurantPosts)
-router.post('/getNibbles', nibbleController.getNibbles)
 router.post('/getCommentsOfReel', nibbleController.getCommentsOfReel)
 router.post('/getLikesOfReel', nibbleController.getLikesOfReel)
 
