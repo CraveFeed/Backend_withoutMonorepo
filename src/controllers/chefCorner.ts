@@ -237,6 +237,7 @@ export const createCommentOnReel = async (req: Request, res: Response): Promise<
             }
         });
 
+        res.status(200).json({ message: "Comment added successfully" });
     } catch (error) {
         res.status(400).json({ error: error });
     }

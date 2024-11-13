@@ -106,7 +106,7 @@ export const getChatList = async (req: Request, res: Response): Promise<any> => 
 
 export const getChatHistory = async (req: Request, res: Response): Promise<any> => {
     try {
-        const {userId} = req.params;
+        const {userId} = req.body;
         const currentUserId = (req as any).user.userId;
         const { page=1, pageSize = 20 } = req.query;
 

@@ -130,10 +130,10 @@ export const checkEmail = async (req: Request, res: Response): Promise<any> => {
                 email: email,
             },
         });
-        if(user){
-            res.status(200).json({ message: "Email already taken" });
+        if(!user){
+            res.status(400).json({ message: "Email already taken" });
         } else {
-            res.status(400).json({ message: "Email exists" });
+            res.status(200).json({ message: "Email exists" });
         }
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });

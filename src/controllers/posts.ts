@@ -108,6 +108,7 @@ export const getCommentsOfPosts = async (req: Request, res: Response): Promise<a
                 createdAt: true,
                 user: {
                     select: {
+                        id: true,
                         username: true,
                         firstName: true,
                         lastName: true,
@@ -144,6 +145,7 @@ export const getLikesOfPosts = async (req: Request, res: Response): Promise<any>
                 id: true,
                 user: {
                     select: {
+                        id: true,
                         username: true,
                         firstName: true,
                         lastName: true,

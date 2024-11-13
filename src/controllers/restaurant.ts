@@ -308,3 +308,29 @@ export const getRestaurantFollowing = async (req: Request, res: Response): Promi
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const createRestaurant = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const userId = (req as any).user.userId;
+        const { address, city, state, zipCode, latitude, longitude} = req.body;
+
+        if(!address || !city || !state || !zipCode || !latitude || !longitude){
+             res.status(400).json({ error: "Fields are required" });
+        }
+
+        const restaurant = await pclient.restaurant.create({
+            data: {
+                address,
+                city,
+                state,
+                zipCode,
+                latitude,
+                longitude,
+                userId
+            }
+        });
+        res.status(201).json({ restaurant });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}

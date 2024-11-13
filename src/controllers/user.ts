@@ -228,3 +228,66 @@ export const followUnfollowUser = async (req: Request, res: Response): Promise<a
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const updateUserProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.userId;
+        const user = await pclient.user.findUnique({
+            where: {
+                id: userId,
+            },
+        });
+
+        if (!user) {
+            res.status(401).json({ error: "User does not exist" });
+            return Promise.resolve();
+        }
+
+        const { firstName, lastName, bio, profilePicture, bannerImage, Latitude, Longitude, Dish,  Spiciness , Sweetness, Sourness } = req.body;
+
+        if (firstName) {
+            user.firstName = firstName;
+        }
+        if (lastName) {
+            user.lastName = lastName;
+        }
+        if (bio) {
+            user.bio = bio;
+        }
+        if (profilePicture) {
+            user.avatar = profilePicture;
+        }
+        if (bannerImage) {
+            user.banner = bannerImage;
+        }
+        if (Latitude) {
+            user.Latitude = Latitude;
+        }
+        if (Longitude) {
+            user.Longitude = Longitude;
+        }
+        if (Dish) {
+            user.Dish = Dish;
+        }
+        if (Spiciness) {
+            user.Spiciness = Spiciness;
+        }
+        if (Sweetness) {
+            user.Sweetness = Sweetness;
+        }
+        if (Sourness) {
+            user.Sourness = Sourness;
+        }
+
+        await pclient.user.update({
+            where: {
+                id: userId,
+            },
+            data: user,
+        });
+
+        res.status(200).json({ message: "Profile updated successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
