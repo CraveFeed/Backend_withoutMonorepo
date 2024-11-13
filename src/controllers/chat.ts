@@ -4,9 +4,7 @@ import pclient from "../db/client";
 export const getChatList = async (req: Request, res: Response): Promise<any> => {
     try {
         const userId = (req as any).user.userId;
-        console.log("User ID:", userId);  // Ensure correct userId is used
 
-        // Fetch messages where the user is either the sender or receiver
         const messages = await pclient.message.findMany({
             where: {
                 OR: [
@@ -45,49 +43,33 @@ export const getChatList = async (req: Request, res: Response): Promise<any> => 
             }
         });
 
-        console.log("Fetched Messages:", messages);  // Check if messages are fetched
-
-        // If no messages are found, return empty list
         if (!messages || messages.length === 0) {
-            console.log("No messages found for user", userId);
             return res.status(200).json({ chattedUsers: [] });
         }
 
-        // Map to store the most recent message for each conversation
         const usersMap = new Map<string, any>();
 
-        // Iterate over all messages
         messages.forEach((message) => {
             const senderId = message.senderId;
             const receiverId = message.receiverId;
 
-            // Ensure valid sender and receiver IDs
             if (!senderId || !receiverId) {
-                console.log("Invalid sender or receiver ID, skipping message:", message);  // Log invalid entries
-                return; // Skip invalid entries
+                return;
             }
 
-            console.log("Processing message from:", senderId, "to:", receiverId);  // Log sender and receiver IDs
-
-            // Determine the other user in the conversation
             const otherUser = senderId === userId ? message.receiver : message.sender;
 
-            // Skip if the otherUser is null
             if (!otherUser) {
                 console.log("No other user found for this message, skipping.");
-                return;  // Skip processing if otherUser is null
+                return;
             }
 
-            // Generate a unique conversation key based on lexicographical order of string IDs
             const conversationKey = `${[senderId, receiverId].sort().join('-')}`;
-            console.log("Conversation Key:", conversationKey);  // Log conversation key
 
-            // Update the conversation with the latest message
             const existingConversation = usersMap.get(conversationKey);
             const messageDate = new Date(message.createdAt).getTime();
 
             if (!existingConversation) {
-                // If no existing conversation, create a new entry
                 usersMap.set(conversationKey, {
                     userId: otherUser.id,
                     username: otherUser.username,
@@ -98,9 +80,7 @@ export const getChatList = async (req: Request, res: Response): Promise<any> => 
                     latestMessage: message.content,
                     lastMessageDate: message.createdAt,
                 });
-                console.log("New conversation created for user:", otherUser.username);  // Log new conversation
             } else {
-                // Compare the dates and update the latest message if the current one is newer
                 const existingDate = new Date(existingConversation.lastMessageDate).getTime();
                 if (messageDate > existingDate) {
                     existingConversation.latestMessage = message.content;
@@ -109,16 +89,12 @@ export const getChatList = async (req: Request, res: Response): Promise<any> => 
             }
         });
 
-        // Convert the map to an array and sort by the last message date (latest first)
         const chattedUsers = Array.from(usersMap.values()).sort((a, b) => {
             const aDate = new Date(a.lastMessageDate).getTime();
             const bDate = new Date(b.lastMessageDate).getTime();
-            return bDate - aDate; // Sort descending, with the latest message first
+            return bDate - aDate;
         });
 
-        console.log("Chatted Users:", chattedUsers);  // Log the final list of chatted users
-
-        // Send the list of chatted users
         res.status(200).json({ chattedUsers });
 
     } catch (error) {
