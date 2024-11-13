@@ -151,7 +151,7 @@ model Post {
   isBusinessPost Boolean
   pictures       String[]
   userId         String
-  city           String?
+  city           String
   impressions    Int       @default(0)
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes          Like[]

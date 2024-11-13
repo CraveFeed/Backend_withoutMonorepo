@@ -35,7 +35,7 @@ export const sendOTP = async (req: Request, res: Response): Promise<any> => {
 
         await rClient.set(email, otp, 300);
 
-        const otpLink = `http://localhost:${port}/verify-otp?email=${encodeURIComponent(email)}&otp=${otp}`;
+        const otpLink = `http://localhost:${port}/email/verify-otp?email=${encodeURIComponent(email)}&otp=${otp}`;
 
         const mailOptions = {
             from: process.env.EMAIL as string,

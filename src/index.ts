@@ -1,21 +1,30 @@
 import express from 'express';
-import userRoutes from './routes/userRoute';
+import authRoutes from './routes/authRoute';
 import emailVerificationRoutes from './routes/emailVerification';
-import chatRoutes from './routes/chatRoutes';
+import businessRoutes from './routes/businessRoutes';
 import {initializeChatSocket} from "./loaders/webSockets/chatSocket";
 import {authenticateUser} from "./middlewares/authMiddleware";
+import userRoutes from "./routes/userRoutes";
+import {afterBusinessMiddleware} from "./middlewares/afterBusinessMiddleware";
+import publicRoutes from "./routes/publicRoutes";
+import http from 'http';
 
 const app = express();
+const server = http.createServer(app);
 app.use(express.json());
 
-app.use('/', emailVerificationRoutes);
-app.use('/user', userRoutes);
+app.use('/email', emailVerificationRoutes)
+app.use('/auth', authRoutes)
+app.use('/public', publicRoutes)
 app.use(authenticateUser);
-app.use('/chat', chatRoutes);
+app.use('/user', userRoutes);
+app.use(afterBusinessMiddleware);
+app.use('/restaurant', businessRoutes);
 
-initializeChatSocket(app);
+initializeChatSocket(server);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`API Service running on port ${PORT}`);
+
+server.listen(PORT, () => {
+    console.log(`API Service and WebSocket running on port ${PORT}`);
 });

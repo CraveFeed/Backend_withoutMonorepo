@@ -9,4 +9,3 @@ export interface ChatMessage {
 export interface ExtendedWebSocket extends WebSocket {
     userId?: string;
 }
-

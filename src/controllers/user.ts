@@ -32,7 +32,7 @@ export const deleteComment = async (req: Request, res: Response): Promise<any> =
             }
         });
 
-        res.status(200).json({ comment });
+        res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
@@ -74,18 +74,22 @@ export const likeUnlikePost = async (req: Request, res: Response): Promise<any> 
 
 export const createPost = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { title, description, latitude, longitude, Cuisine, Dish, isBusinessPost, pictures, impressions, restaurantId, hashtags } = req.body;
+        const { title, description, latitude, longitude, Cuisine, Dish, isBusinessPost, pictures, impressions, restaurantId, hashtags, city } = req.body;
         const userId = (req as any).user.userId;
 
+        let restId = null;
+
+        if(restaurantId){
         const resId = await pclient.restaurant.findUnique({
             where: { id: restaurantId },
             select: {
                 id: true,
             }
         });
-
-        if (!resId) {
+        if(!resId){
             return res.status(400).json({ error: "Restaurant not found for the provided restaurantId." });
+        }
+        restId = resId.id;
         }
 
         const newPost = await pclient.post.create({
@@ -100,7 +104,8 @@ export const createPost = async (req: Request, res: Response): Promise<any> => {
                 pictures,
                 impressions,
                 userId,
-                restaurantId: resId!.id,
+                city,
+                restaurantId: restId!,
             },
         });
 
@@ -132,6 +137,7 @@ export const createPost = async (req: Request, res: Response): Promise<any> => {
 
         res.status(201).json({ newPost });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -173,6 +179,7 @@ export const repostPost = async (req: Request, res: Response): Promise<any> => {
                     pictures: originalPost.pictures,
                     impressions: 0,
                     userId,
+                    city: originalPost.city,
                     originalPostId: originalPost.id,
                     restaurantId: originalPost.restaurantId,
                     hashTags: { connect: originalPost.hashTags.map((hashtag) => ({ id: hashtag.id })) },

@@ -16,6 +16,8 @@ export const getHashStartingWith = async (req: Request, res: Response): Promise<
                 word: true,
             }
         })
+
+        res.status(200).json(hashTags)
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }
