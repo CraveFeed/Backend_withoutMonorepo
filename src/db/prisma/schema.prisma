@@ -106,7 +106,7 @@ model Restaurant {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   latitude   String
-  isBusiness Boolean
+  isBusiness Boolean  @default(false)
   longitude  String
   events     Event[]
   menus      Menu[]
