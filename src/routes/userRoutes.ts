@@ -23,5 +23,6 @@ router.post('/deleteCommentOnReel', nibbleController.deleteCommentOnReel)
 router.post('/updateUserProfile', userController.updateUserProfile)
 router.post('/createRestaurant', checkBusinessOwner, restaurantController.createRestaurant)
 router.post('/getNibbles', nibbleController.getNibbles)
+router.post('/getOthersProfile', userController.getOthersProfileSummary)
 
 export default router;

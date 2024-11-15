@@ -290,3 +290,48 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<an
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getOthersProfileSummary = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { userId } = (req as any).user.userId;
+        const { otherUserId } = req.body;
+
+        const [ profileData, followCheck ] = await pclient.$transaction([
+         pclient.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                Type: true,
+                bio: true,
+                banner: true,
+                _count: {
+                    select: {
+                        posts: true,
+                        followers: true,
+                        following: true,
+                    }
+                }
+            }
+        }),
+        pclient.follows.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: otherUserId,
+                    followingId: userId,
+                }
+            }
+        }),
+        ]);
+        if (!followCheck){
+            res.status(200).json({ profileData,following: false });
+        } else {
+            res.status(200).json({ profileData,following: true });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
