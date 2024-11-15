@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes";
 import {afterBusinessMiddleware} from "./middlewares/afterBusinessMiddleware";
 import publicRoutes from "./routes/publicRoutes";
 import http from 'http';
+import s3Routes from "./routes/s3Routes";
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +19,7 @@ app.use('/auth', authRoutes)
 app.use('/public', publicRoutes)
 app.use(authenticateUser);
 app.use('/user', userRoutes);
+app.use('/s3', s3Routes)
 app.use(afterBusinessMiddleware);
 app.use('/restaurant', businessRoutes);
 

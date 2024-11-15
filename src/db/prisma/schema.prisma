@@ -98,19 +98,20 @@ model ChefCorner {
 }
 
 model Restaurant {
-  id        String   @id @default(cuid())
-  address   String
-  city      String
-  state     String
-  zipCode   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  latitude  String
-  longitude String
-  events    Event[]
-  menus     Menu[]
-  userId    String   @unique
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  address    String
+  city       String
+  state      String
+  zipCode    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  latitude   String
+  isBusiness Boolean
+  longitude  String
+  events     Event[]
+  menus      Menu[]
+  userId     String   @unique
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Optional relationship with posts where a restaurant might be tagged
   posts Post[] // Posts that tagged the restaurant
