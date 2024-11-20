@@ -1,18 +1,56 @@
 import pclient from "../db/client";
 import {Request, Response} from "express";
+import produceNotification from "../loaders/kafka/producerHandler";
 
 export const commentOnPost = async (req: Request, res: Response): Promise<any> => {
     try {
         const { postId, content } = req.body;
         const userId = (req as any).user.userId;
 
-        const comment = await pclient.comment.create({
+        const [comment, receiver, sender] = await pclient.$transaction([
+        pclient.comment.create({
             data: {
                 postId,
                 content,
                 userId
             }
-        });
+        }),
+
+        pclient.post.findUnique({
+            where: {
+                id: postId,
+            },
+            include: {
+                User: {
+                    select: {
+                        id: true,
+                    }
+                }
+            }
+        }),
+
+        pclient.user.findUnique({
+            where: {
+                id: userId,
+            },
+            select: {
+                avatar: true,
+                username: true,
+            }
+        })
+        ]);
+
+        if(receiver && sender){
+            produceNotification({
+                type: 'notification',
+                message: 'Commented on your post',
+                senderId: userId,
+                receiverId: receiver.User.id,
+                avatar: sender.avatar!,
+                creatorUserName: sender.username,
+                postId: postId
+            });
+        }
 
         res.status(201).json({ comment });
     } catch (error) {
@@ -58,12 +96,50 @@ export const likeUnlikePost = async (req: Request, res: Response): Promise<any> 
             });
             res.status(200).json({ like });
         } else {
-            const like = await pclient.like.create({
-                data: {
-                    postId,
-                    userId,
-                }
-            });
+            const [like, receiver, sender] = await pclient.$transaction([
+                pclient.like.create({
+                    data: {
+                        postId,
+                        userId,
+                    },
+                }),
+
+                pclient.post.findUnique({
+                    where: {
+                        id: postId,
+                    },
+                    include: {
+                        User: {
+                            select: {
+                                id: true,
+                            }
+                        }
+                    }
+                }),
+
+                pclient.user.findUnique({
+                    where: {
+                        id: userId,
+                    },
+                    select: {
+                        avatar: true,
+                        username: true
+                    }
+                })
+            ]);
+
+            if (receiver && sender) {
+                produceNotification({
+                    type: 'notification',
+                    message: 'Liked your post',
+                    senderId: userId,
+                    receiverId: receiver.User.id,
+                    avatar: sender.avatar!,
+                    creatorUserName: sender.username,
+                    postId: postId
+                });
+            }
+
             res.status(201).json({ like });
         }
 
@@ -216,12 +292,38 @@ export const followUnfollowUser = async (req: Request, res: Response): Promise<a
             })
             res.status(200).json({ message: "Unfollowed successfully" });
         } else {
-            await pclient.follows.create({
-                data: {
-                    followerId: userId,
-                    followingId: userToFollowId,
-                },
-            });
+            const [follow, sender] = await pclient.$transaction([
+
+                pclient.follows.create({
+                    data: {
+                        followerId: userId,
+                        followingId: userToFollowId,
+                    },
+                }),
+
+                pclient.user.findUnique({
+                    where: {
+                        id: userId
+                    },
+                    select: {
+                        avatar: true,
+                        username: true
+                    }
+                })
+
+            ])
+
+            if(sender){
+                produceNotification({
+                    type: 'notification',
+                    message: 'Started following you',
+                    senderId: userId,
+                    receiverId: userToFollowId,
+                    avatar: sender.avatar!,
+                    creatorUserName: sender.username,
+                });
+            }
+
             res.status(200).json({ message: "Followed successfully" });
         }
     } catch (error) {
@@ -293,7 +395,7 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<an
 
 export const getOthersProfileSummary = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { userId } = (req as any).user.userId;
+        const  userId = (req as any).user.userId;
         const { otherUserId } = req.body;
 
         const [ profileData, followCheck ] = await pclient.$transaction([

@@ -54,18 +54,16 @@ export const login = async (req: Request, res: Response): Promise<any> => {
             return res.status(400).json({ error: "Invalid email or password" });
         }
 
-        // Check password
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(400).json({ error: "Invalid email or password" });
         }
 
-        // Generate JWT token
         const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRES_IN,
         });
 
-        res.json({ message: "Login successful", token });
+        res.json({ message: "Login successful", token, "userId": user.id, "userType": user.Type });
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
     }

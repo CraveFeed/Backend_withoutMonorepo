@@ -50,7 +50,7 @@ export const getPostsByHashtag = async (req: Request, res: Response): Promise<an
                 impressions: true,
                 originalPostId: true,
                 repostedPosts: true,
-                user: {
+                User: {
                     select: {
                         username: true,
                         firstName: true,
@@ -275,7 +275,7 @@ export const getUsersPosts = async (req: Request, res: Response): Promise<any> =
                 impressions: true,
                 originalPostId: true,
                 repostedPosts: true,
-                user: {
+                User: {
                     select: {
                         username: true,
                         firstName: true,

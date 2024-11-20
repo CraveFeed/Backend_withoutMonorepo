@@ -41,7 +41,7 @@ model User {
   username           String              @unique
   password           String
   bio                String?
-  avatar             String?
+  avatar             String              @default("https://avatars.dicebear.com/api/bottts/1.svg")
   firstName          String
   lastName           String
   Latitude           String?
@@ -155,7 +155,7 @@ model Post {
   userId         String
   city           String
   impressions    Int       @default(0)
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes          Like[]
   comments       Comment[]
   hashTags       HashTag[]
@@ -222,17 +222,20 @@ model Follows {
 model NotificationUpdate {
   id       String   @id @default(cuid())
   User     User     @relation(fields: [userId], references: [id])
-  dateTime DateTime @default(now())
-  count    Int
+  dateTime DateTime @updatedAt
+  count    Int      @default(0)
   userId   String   @unique
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  avatar    String?
-  message   String
-  creatorId String
-  createdAt DateTime @default(now())
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String   @id @default(cuid())
+  userId          String
+  avatar          String   @default("https://avatars.dicebear.com/api/bottts/1.svg")
+  read            Boolean  @default(false)
+  message         String
+  creatorUserName String
+  postId          String?
+  creatorId       String
+  createdAt       DateTime @default(now())
+  User            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
