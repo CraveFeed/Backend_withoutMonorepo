@@ -11,15 +11,18 @@ import publicRoutes from "./routes/publicRoutes";
 import http from 'http';
 import s3Routes from "./routes/s3Routes";
 import {initializeKafkaConsumer} from "./loaders/kafka/consumerHandler";
+import shareRoutes from "./routes/shareRoutes";
 
 const app = express();
 const server = http.createServer(app);
 app.use(express.json());
 
-app.use('/email', emailVerificationRoutes)
-app.use('/auth', authRoutes)
-app.use('/public', publicRoutes)
+
+app.use('/share', shareRoutes);
+app.use('/email', emailVerificationRoutes);
+app.use('/auth', authRoutes);
 app.use(authenticateUser);
+app.use('/public', publicRoutes)
 app.use('/user', userRoutes);
 app.use('/s3', s3Routes)
 app.use('/notification', notificationRoutes);
