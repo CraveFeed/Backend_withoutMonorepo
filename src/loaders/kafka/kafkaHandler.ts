@@ -5,7 +5,7 @@ dotenv.config();
 
 const kafka = new Kafka({
     clientId: process.env.KAFKA_CLIENT_ID as string,
-    brokers: ['localhost:9092']
-})
+    brokers: (process.env.KAFKA_BROKERS || 'localhost:9092').split(',')
+});
 
 export default kafka;

@@ -17,6 +17,10 @@ const app = express();
 const server = http.createServer(app);
 app.use(express.json());
 
+// Add health check endpoint
+app.get('/health', (_, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
 
 app.use('/share', shareRoutes);
 app.use('/email', emailVerificationRoutes);
