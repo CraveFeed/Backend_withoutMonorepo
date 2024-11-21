@@ -275,8 +275,10 @@ export const getUsersPosts = async (req: Request, res: Response): Promise<any> =
                 impressions: true,
                 originalPostId: true,
                 repostedPosts: true,
+                createdAt: true,
                 User: {
                     select: {
+                        id: true,
                         username: true,
                         firstName: true,
                         lastName: true,
