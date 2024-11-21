@@ -10,10 +10,17 @@ const kafka_topic = process.env.KAFKA_TOPIC as string;
 const kafka_group = process.env.KAFKA_GROUP as string;
 const consumer = kafka.consumer({ groupId: kafka_group });
 
+const MAX_RETRIES = 10;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+const MAX_RETRY_DELAY = 30000; // 30 seconds
+
 export const initializeKafkaConsumer = (wss: WebSocketServer) => {
-    const run = async () => {
+    const run = async (retryCount = 0) => {
         try {
+            console.log('Attempting to connect to Kafka...');
             await consumer.connect();
+            console.log('Successfully connected to Kafka');
+            
             await consumer.subscribe({ topic: kafka_topic, fromBeginning: false });
             
             await consumer.run({
@@ -85,13 +92,34 @@ export const initializeKafkaConsumer = (wss: WebSocketServer) => {
             });
         } catch (error) {
             console.error("Kafka consumer error:", error);
-            setTimeout(run, 5000);
+            
+            if (retryCount < MAX_RETRIES) {
+                const delay = Math.min(INITIAL_RETRY_DELAY * Math.pow(2, retryCount), MAX_RETRY_DELAY);
+                console.log(`Retrying connection in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+                
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return run(retryCount + 1);
+            } else {
+                console.error("Max retries exceeded. Failed to connect to Kafka.");
+            }
+        }
+    };
+
+    // Handle graceful shutdown
+    const shutdown = async () => {
+        try {
+            await consumer.disconnect();
+            console.log('Kafka consumer disconnected');
+        } catch (error) {
+            console.error('Error during Kafka consumer shutdown:', error);
         }
     };
 
     run().catch(console.error);
+    
+    // Handle process termination
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
 
-    return () => {
-        consumer.disconnect();
-    };
+    return shutdown;
 };
