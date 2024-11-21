@@ -1,5 +1,6 @@
 import express from 'express';
 import authRoutes from './routes/authRoute';
+import cors from 'cors';
 import emailVerificationRoutes from './routes/emailVerification';
 import businessRoutes from './routes/businessRoutes';
 import {initializeChatSocket} from "./loaders/webSockets/chatSocket";
@@ -15,9 +16,12 @@ import shareRoutes from "./routes/shareRoutes";
 
 const app = express();
 const server = http.createServer(app);
+
+app.use(cors());
+
 app.use(express.json());
 
-// Add health check endpoint
+
 app.get('/health', (_, res) => {
   res.status(200).json({ status: 'healthy' });
 });
