@@ -11,6 +11,7 @@ const generateOtp = (): string => {
 };
 
 const port = process.env.PORT || 3000;
+const baseUrl = process.env.BASE_URL || `http://localhost:${port}`;
 
 export const sendOTP = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -35,7 +36,7 @@ export const sendOTP = async (req: Request, res: Response): Promise<any> => {
 
         await rClient.set(email, otp, 300);
 
-        const otpLink = `http://localhost:${port}/email/verify-otp?email=${encodeURIComponent(email)}&otp=${otp}`;
+        const otpLink = `${baseUrl}/email/verify-otp?email=${encodeURIComponent(email)}&otp=${otp}`;
 
         const mailOptions = {
             from: process.env.EMAIL as string,
