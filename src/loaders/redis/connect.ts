@@ -1,4 +1,7 @@
 import { createClient, RedisClientType } from 'redis';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 let client: RedisClientType | null = null;
 
