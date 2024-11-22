@@ -11,12 +11,19 @@ export const getNotifications = async (req: Request, res: Response): Promise<voi
                     userId: userId,
                 },
                 select: {
+                    id: true,
                     avatar: true,
                     message: true,
                     creatorId: true,
                     read: true,
                     creatorUserName: true,
                     createdAt: true,
+                    User: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                        }
+                    }
                 }
             }),
 
