@@ -24,5 +24,8 @@ router.post('/updateUserProfile', userController.updateUserProfile)
 router.post('/createRestaurant', checkBusinessOwner, restaurantController.createRestaurant)
 router.post('/getNibbles', nibbleController.getNibbles)
 router.post('/getOthersProfile', userController.getOthersProfileSummary)
+router.post('/getForYouPosts', userController.getForYouPosts);
+router.post('/getExplorePosts', userController.getExplorePosts);
+router.post('/getHomePosts', userController.getHomePosts);
 
 export default router;

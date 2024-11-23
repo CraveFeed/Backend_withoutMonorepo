@@ -437,3 +437,177 @@ export const getOthersProfileSummary = async (req: Request, res: Response): Prom
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getForYouPosts = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = (req as any).user.userId;
+
+        const posts = await pclient.post.findMany({
+            where: {
+                userId: { not: userId }
+            },
+            orderBy: [
+                {
+                    likes: {
+                        _count: 'desc'
+                    }
+                },
+                {
+                    comments: {
+                        _count: 'desc'
+                    }
+                },
+                {
+                    createdAt: 'desc'
+                }
+            ],
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                latitude: true,
+                longitude: true,
+                Cuisine: true,
+                Dish: true,
+                isBusinessPost: true,
+                pictures: true,
+                impressions: true,
+                originalPostId: true,
+                repostedPosts: true,
+                createdAt: true,
+                User: {
+                    select: {
+                        id: true,
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        avatar: true,
+                        Type: true,
+                    }
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        comments: true,
+                    }
+                },
+            },
+            take: 10
+        });
+
+        res.status(200).json({ posts });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+export const getExplorePosts = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = (req as any).user.userId;
+        const { latitude, longitude } = req.body;
+
+        const posts = await pclient.post.findMany({
+            where: {
+                latitude: {
+                    gte: (parseFloat(latitude) - 0.1).toString(),
+                    lte: (parseFloat(latitude) + 0.1).toString()
+                },
+                longitude: {
+                    gte: (parseFloat(longitude) - 0.1).toString(),
+                    lte: (parseFloat(longitude) + 0.1).toString()
+                },
+                userId: { not: userId }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                latitude: true,
+                longitude: true,
+                Cuisine: true,
+                Dish: true,
+                isBusinessPost: true,
+                pictures: true,
+                impressions: true,
+                originalPostId: true,
+                repostedPosts: true,
+                createdAt: true,
+                User: {
+                    select: {
+                        id: true,
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        avatar: true,
+                        Type: true,
+                    }
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        comments: true,
+                    }
+                },
+            },
+            take: 10,
+        });
+
+        res.status(200).json({ posts });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+export const getHomePosts = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const userId = (req as any).user.userId;
+
+        const posts = await pclient.post.findMany({
+            where: {
+                userId: { not: userId }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                latitude: true,
+                longitude: true,
+                Cuisine: true,
+                Dish: true,
+                isBusinessPost: true,
+                pictures: true,
+                impressions: true,
+                originalPostId: true,
+                repostedPosts: true,
+                createdAt: true,
+                User: {
+                    select: {
+                        id: true,
+                        username: true,
+                        firstName: true,
+                        lastName: true,
+                        avatar: true,
+                        Type: true,
+                    }
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        comments: true,
+                    }
+                },
+            },
+            take: 10,
+        });
+
+        res.status(200).json({ posts });
+    } catch (error) {
+        res.status (500).json({ error: "Internal server error" });
+    }
+};

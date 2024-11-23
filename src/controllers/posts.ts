@@ -386,3 +386,90 @@ export const getUserFollowing = async (req: Request, res: Response): Promise<any
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getUserAndRestaurantDetails = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { userId } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required." });
+        }
+
+        const profileData = await pclient.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                Type: true,
+                bio: true,
+                banner: true,
+                _count: {
+                    select: {
+                        posts: true,
+                        followers: true,
+                        following: true,
+                    }
+                }
+            }
+        });
+
+        if (!profileData) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        let restaurantDetails = null;
+        if (profileData.Type === 'BUSINESS') {
+            const restaurant = await pclient.user.findUnique({
+                where: { id: userId, Type: 'BUSINESS' },
+                select: {
+                    Restaurant: {
+                        select: {
+                            id: true,
+                            address: true,
+                            city: true,
+                            state: true,
+                            zipCode: true,
+                            latitude: true,
+                            longitude: true,
+                            User: {
+                                select: {
+                                    id: true,
+                                    username: true,
+                                    firstName: true,
+                                    lastName: true,
+                                    avatar: true,
+                                    Type: true,
+                                    bio: true,
+                                    banner: true,
+                                    _count: {
+                                        select: {
+                                            posts: true,
+                                            followers: true,
+                                            following: true,
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            });
+
+            if (restaurant && restaurant.Restaurant) {
+                restaurantDetails = restaurant.Restaurant;
+            }
+        }
+
+        res.status(200).json({
+            profileData,
+            restaurant: restaurantDetails || null
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
